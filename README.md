@@ -5,6 +5,12 @@ A [Decky Loader](https://github.com/SteamDeckHomebrew/decky-loader) plugin that
 the [Kitsune Midnight Glass](https://github.com/K1tsune12/decky-kitsune-midnight-glass-theme)
 theme from the Quick Access Menu, with presets.
 
+![Steam menu over a running game](images/steam-menu-ingame.png)
+*Steam menu over a running game: translucent, with the game blurred behind it.*
+
+![Friends and chat over a running game](images/friends-chat-ingame.png)
+*Friends and chat in Quick Access over a running game (names hidden).*
+
 ## Features
 
 - **Game blur behind menus**: while the Steam menu, Quick Access or a dialog is
