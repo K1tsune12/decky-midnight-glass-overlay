@@ -1,0 +1,11 @@
+{
+  "name": "Midnight Glass Overlay",
+  "author": "K1tsune12",
+  "flags": [],
+  "api_version": 1,
+  "publish": {
+    "tags": ["blur", "theme", "customization"],
+    "description": "Blur the game behind Steam menus and tweak the Kitsune Midnight Glass theme from the Quick Access Menu.",
+    "image": ""
+  }
+}
