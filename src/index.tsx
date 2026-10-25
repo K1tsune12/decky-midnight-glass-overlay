@@ -10,12 +10,22 @@ import {
 import { useCallback, useEffect, useState } from 'react';
 import { FaGlasses } from 'react-icons/fa';
 
+import { PerfOverlaySection } from './PerfOverlaySection';
 import { PresetsSection } from './PresetsSection';
 import { GameBlur } from './blur';
+import { setPerfStyle } from './perf';
 import { BLUR_RADIUS_MAX, BLUR_RADIUS_MIN, OverlaySettings, getSettings, saveSettings } from './settings';
 import { THEME_NAME, ThemeInfo, ThemePatch, getTheme, setThemeEnabled, setThemePatch } from './theme';
 
 let blur: GameBlur | undefined;
+
+/** Applies the plugin's own settings: game blur and performance overlay background. */
+function applySettings(s: OverlaySettings) {
+  blur?.update(s.blurEnabled, s.blurRadius, s.blurWhilePlaying);
+  setPerfStyle(s.perfStyleEnabled, s.perfColor, s.perfAlpha).catch((e) =>
+    console.error('[midnight-glass-overlay] failed to style the performance overlay', e),
+  );
+}
 
 /** Theme options shown in the panel, grouped. Missing ones are skipped. */
 const THEME_GROUPS: { title: string; patches: string[] }[] = [
@@ -94,7 +104,7 @@ function SettingsPanel() {
   const updateBlur = (patch: Partial<OverlaySettings>) => {
     const next = saveSettings(patch);
     setS(next);
-    blur?.update(next.blurEnabled, next.blurRadius);
+    applySettings(next);
   };
 
   const changePatch = async (name: string, value: string) => {
@@ -151,6 +161,8 @@ function SettingsPanel() {
         </PanelSectionRow>
       </PanelSection>
 
+      <PerfOverlaySection settings={s} blurAvailable={!!blur?.available} onChange={updateBlur} />
+
       <PanelSection title="Theme">
         {!themeLoaded ? (
           <PanelSectionRow>
@@ -172,7 +184,7 @@ function SettingsPanel() {
           theme={theme}
           onApplied={(next) => {
             setS(next);
-            blur?.update(next.blurEnabled, next.blurRadius);
+            applySettings(next);
             void refreshTheme();
           }}
         />
@@ -200,10 +212,8 @@ function SettingsPanel() {
 
 export default definePlugin(() => {
   blur = new GameBlur();
-  if (blur.init()) {
-    const s = getSettings();
-    blur.update(s.blurEnabled, s.blurRadius);
-  }
+  blur.init();
+  applySettings(getSettings());
 
   return {
     name: 'Midnight Glass Overlay',

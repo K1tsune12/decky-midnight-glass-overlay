@@ -9,6 +9,11 @@
 // We override that store's ApplyBlurState on the instance: when Steam itself
 // wants blur (or wants it suppressed) we defer to the original; otherwise we
 // keep mode 1 with the user's radius instead of turning blur off.
+//
+// Mode 1 also blurs the game behind gamescope's own overlays, like the
+// performance overlay (MangoHud). With "blur while playing" off, blur is only
+// kept while a Steam menu is drawn over the game, so the performance overlay
+// stays sharp during gameplay.
 
 import { findModuleExport } from '@decky/ui';
 
@@ -31,6 +36,21 @@ interface BlurStore {
 const BLUR_MODE_OFF = 0;
 const BLUR_MODE_BEHIND_STEAM = 1;
 const FADE_MS = 300;
+const MENU_POLL_MS = 250;
+
+// Steam's window composition modes (main window): 0 Hidden, 1 Notification,
+// 2 Overlay, 3 Opaque, 4 OverlayKeyboard. 2+ means Steam is drawn over the game.
+const COMPOSITION_OVERLAY = 2;
+
+function steamMenuOverGame(): boolean {
+  try {
+    const store = (window as any).SteamUIStore?.m_WindowStore?.MainWindowInstance?.m_CompositionStateStore;
+    const mode = store?.m_eLastPushedToWebHelperCompositionState?.eCompositionMode;
+    return typeof mode === 'number' ? mode >= COMPOSITION_OVERLAY : true;
+  } catch {
+    return true;
+  }
+}
 
 const isGamescopeService = (e: any): e is GamescopeService =>
   !!e && typeof e.SetBlurParams === 'function' && typeof e.GetState === 'function';
@@ -46,6 +66,9 @@ export class GameBlur {
   private store?: BlurStore;
   private enabled = false;
   private radius = 20;
+  private whilePlaying = true;
+  private menuOpen = true;
+  private poll?: ReturnType<typeof setInterval>;
 
   /** Finds Steam's gamescope service and blur store. Returns false if missing. */
   init(): boolean {
@@ -67,7 +90,8 @@ export class GameBlur {
     const original = Object.getPrototypeOf(this.store).ApplyBlurState as () => void;
     const self = this;
     this.store.ApplyBlurState = function (this: BlurStore) {
-      if (!self.enabled || this.m_bForceSuppressBlur || this.m_nBlurRefCount > 0) {
+      const wanted = self.enabled && (self.whilePlaying || self.menuOpen);
+      if (!wanted || this.m_bForceSuppressBlur || this.m_nBlurRefCount > 0) {
         return original.call(this);
       }
       void service.SetBlurParams({
@@ -76,6 +100,14 @@ export class GameBlur {
         fade_duration_ms: FADE_MS,
       });
     };
+    this.menuOpen = steamMenuOverGame();
+    this.poll = setInterval(() => {
+      const open = steamMenuOverGame();
+      if (open !== this.menuOpen) {
+        this.menuOpen = open;
+        if (!this.whilePlaying) this.reapply();
+      }
+    }, MENU_POLL_MS);
     return true;
   }
 
@@ -83,13 +115,16 @@ export class GameBlur {
     return !!this.store;
   }
 
-  update(enabled: boolean, radius: number) {
+  update(enabled: boolean, radius: number, whilePlaying: boolean) {
     this.enabled = enabled;
     this.radius = radius;
+    this.whilePlaying = whilePlaying;
     this.reapply();
   }
 
   dispose() {
+    if (this.poll) clearInterval(this.poll);
+    this.poll = undefined;
     if (!this.store) return;
     // Drop the instance override so the prototype method is used again.
     delete (this.store as Partial<BlurStore>).ApplyBlurState;
