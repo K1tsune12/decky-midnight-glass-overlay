@@ -7,12 +7,13 @@ import {
   ToggleField,
   staticClasses,
 } from '@decky/ui';
-import { useCallback, useEffect, useState } from 'react';
+import { FC, useCallback, useEffect, useState } from 'react';
 import { FaGlasses } from 'react-icons/fa';
 
 import { PerfOverlaySection } from './PerfOverlaySection';
 import { PresetsSection } from './PresetsSection';
 import { GameBlur } from './blur';
+import { Key, LANGUAGE_NAMES, Lang, LangSetting, getLangSetting, initLanguage, setLangSetting, steamLanguageNow, t, themeText, useLanguage } from './i18n';
 import { setPerfStyle } from './perf';
 import { BLUR_RADIUS_MAX, BLUR_RADIUS_MIN, OverlaySettings, getSettings, saveSettings } from './settings';
 import { THEME_NAME, ThemeInfo, ThemePatch, getTheme, setThemeEnabled, setThemePatch } from './theme';
@@ -28,9 +29,9 @@ function applySettings(s: OverlaySettings) {
 }
 
 /** Theme options shown in the panel, grouped. Missing ones are skipped. */
-const THEME_GROUPS: { title: string; patches: string[] }[] = [
+const THEME_GROUPS: { title: Key; patches: string[] }[] = [
   {
-    title: 'In-Game Overlay',
+    title: 'group.inGame',
     patches: [
       'In-Game Menu Style',
       'In-Game Bars Follow Menus',
@@ -40,7 +41,7 @@ const THEME_GROUPS: { title: string; patches: string[] }[] = [
     ],
   },
   {
-    title: 'Menus, Dialogs & Notifications',
+    title: 'group.menus',
     patches: ['Menu Opacity', 'Chat Opacity', 'Dialog Opacity', 'Notification Opacity', 'Main Color', 'Accent Color'],
   },
 ];
@@ -51,7 +52,7 @@ function PatchControl({ patch, onChange }: { patch: ThemePatch; onChange: (value
   if (patch.type === 'checkbox') {
     return (
       <ToggleField
-        label={patch.name}
+        label={themeText(patch.name)}
         checked={patch.value === 'Yes'}
         onChange={(on) => onChange(on ? 'Yes' : 'No')}
       />
@@ -61,8 +62,8 @@ function PatchControl({ patch, onChange }: { patch: ThemePatch; onChange: (value
   if (patch.type === 'slider' && patch.options.length > 1) {
     return (
       <SliderField
-        label={patch.name}
-        description={patch.value}
+        label={themeText(patch.name)}
+        description={themeText(patch.value)}
         value={index}
         min={0}
         max={patch.options.length - 1}
@@ -79,8 +80,8 @@ function PatchControl({ patch, onChange }: { patch: ThemePatch; onChange: (value
 
   return (
     <DropdownItem
-      label={patch.name}
-      rgOptions={patch.options.map((o) => ({ data: o, label: o }))}
+      label={themeText(patch.name)}
+      rgOptions={patch.options.map((o) => ({ data: o, label: themeText(o) }))}
       selectedOption={patch.value}
       onChange={(o) => onChange(o.data as string)}
     />
@@ -88,6 +89,7 @@ function PatchControl({ patch, onChange }: { patch: ThemePatch; onChange: (value
 }
 
 function SettingsPanel() {
+  useLanguage();
   const [s, setS] = useState<OverlaySettings>(getSettings());
   const [theme, setTheme] = useState<ThemeInfo | undefined>();
   const [themeLoaded, setThemeLoaded] = useState(false);
@@ -132,14 +134,14 @@ function SettingsPanel() {
 
   return (
     <>
-      <PanelSection title="Game Blur">
+      <PanelSection title={t('blur.title')}>
         <PanelSectionRow>
           <ToggleField
-            label="Blur game behind menus"
+            label={t('blur.toggle')}
             description={
               blur?.available
-                ? 'Blurs the game while Steam menus are open.'
-                : 'Not available on this Steam version.'
+                ? t('blur.toggleDesc')
+                : t('blur.unavailable')
             }
             checked={s.blurEnabled}
             disabled={!blur?.available}
@@ -148,7 +150,7 @@ function SettingsPanel() {
         </PanelSectionRow>
         <PanelSectionRow>
           <SliderField
-            label="Blur strength"
+            label={t('blur.strength')}
             value={s.blurRadius}
             min={BLUR_RADIUS_MIN}
             max={BLUR_RADIUS_MAX}
@@ -163,14 +165,14 @@ function SettingsPanel() {
 
       <PerfOverlaySection settings={s} blurAvailable={!!blur?.available} onChange={updateBlur} />
 
-      <PanelSection title="Theme">
+      <PanelSection title={t('section.theme')}>
         {!themeLoaded ? (
           <PanelSectionRow>
-            <div>Loading…</div>
+            <div>{t('section.themeLoading')}</div>
           </PanelSectionRow>
         ) : !theme ? (
           <PanelSectionRow>
-            <div>Install the {THEME_NAME} theme in CSS Loader to change its options here.</div>
+            <div>{t('section.themeMissing', { theme: THEME_NAME })}</div>
           </PanelSectionRow>
         ) : (
           <PanelSectionRow>
@@ -197,7 +199,7 @@ function SettingsPanel() {
             .filter((p): p is ThemePatch => !!p);
           if (!patches.length) return null;
           return (
-            <PanelSection key={group.title} title={group.title}>
+            <PanelSection key={group.title} title={t(group.title)}>
               {patches.map((p) => (
                 <PanelSectionRow key={p.name}>
                   <PatchControl patch={p} onChange={(v) => void changePatch(p.name, v)} />
@@ -206,11 +208,42 @@ function SettingsPanel() {
             </PanelSection>
           );
         })}
+      <LanguageSection />
     </>
   );
 }
 
+/** Language: automatic (Steam's) or picked here. */
+const LanguageSection: FC = () => {
+  const lang = useLanguage();
+  const [setting, setSetting] = useState<LangSetting>(getLangSetting);
+  const [steamLang, setSteamLang] = useState<Lang>(lang);
+  useEffect(() => {
+    void steamLanguageNow().then(setSteamLang);
+  }, []);
+  return (
+    <PanelSection title={t('lang.title')}>
+      <PanelSectionRow>
+        <DropdownItem
+          label={t('lang.label')}
+          rgOptions={[
+            { data: 'auto', label: t('lang.auto', { lang: LANGUAGE_NAMES[steamLang] }) },
+            { data: 'en', label: LANGUAGE_NAMES.en },
+            { data: 'pt-BR', label: LANGUAGE_NAMES['pt-BR'] },
+          ]}
+          selectedOption={setting}
+          onChange={(o) => {
+            setSetting(o.data as LangSetting);
+            void setLangSetting(o.data as LangSetting);
+          }}
+        />
+      </PanelSectionRow>
+    </PanelSection>
+  );
+};
+
 export default definePlugin(() => {
+  void initLanguage();
   blur = new GameBlur();
   blur.init();
   applySettings(getSettings());

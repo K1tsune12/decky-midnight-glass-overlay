@@ -18,6 +18,7 @@ import {
   getPresets,
   savePreset,
 } from './presets';
+import { t, useLanguage } from './i18n';
 import { BLUR_DEFAULTS, OverlaySettings } from './settings';
 import { ThemeInfo } from './theme';
 
@@ -34,20 +35,21 @@ function SavePresetModal({
   onSave: (name: string) => void;
   closeModal?: () => void;
 }) {
+  useLanguage();
   const [name, setName] = useState(initialName);
   const trimmed = name.trim();
   const overwrite = existing.includes(trimmed);
   return (
     <ConfirmModal
-      strTitle="Save preset"
-      strOKButtonText={overwrite ? 'Overwrite' : 'Save'}
+      strTitle={t('presets.saveTitle')}
+      strOKButtonText={overwrite ? t('presets.overwrite') : t('presets.save')}
       bOKDisabled={!trimmed || trimmed === 'Default'}
       onOK={() => onSave(trimmed)}
       closeModal={closeModal}
     >
       <TextField
-        label="Preset name"
-        description={overwrite ? 'A preset with this name exists and will be replaced.' : undefined}
+        label={t('presets.name')}
+        description={overwrite ? t('presets.nameExists') : undefined}
         value={name}
         onChange={(e) => setName(e.currentTarget.value)}
       />
@@ -62,6 +64,7 @@ export function PresetsSection({
   theme: ThemeInfo;
   onApplied: (blur: OverlaySettings) => void;
 }) {
+  useLanguage();
   const [presets, setPresets] = useState<Preset[]>(getPresets());
   const [selected, setSelected] = useState<string>(DEFAULT_ID);
   const [busy, setBusy] = useState(false);
@@ -97,12 +100,12 @@ export function PresetsSection({
     showModal(<ConfirmModal strTitle={title} strDescription={description} strOKButtonText={ok} onOK={action} />);
 
   return (
-    <PanelSection title="Presets">
+    <PanelSection title={t('presets.title')}>
       <PanelSectionRow>
         <DropdownItem
-          label="Preset"
+          label={t('presets.preset')}
           rgOptions={[
-            { data: DEFAULT_ID, label: 'Default' },
+            { data: DEFAULT_ID, label: t('presets.default') },
             ...presets.map((p) => ({ data: p.name, label: p.name })),
           ]}
           selectedOption={selected}
@@ -115,12 +118,12 @@ export function PresetsSection({
           disabled={busy || !selectedPreset}
           onClick={() => selectedPreset && void run(selectedPreset)}
         >
-          {busy ? 'Applying…' : 'Apply preset'}
+          {busy ? t('presets.applying') : t('presets.apply')}
         </ButtonItem>
       </PanelSectionRow>
       <PanelSectionRow>
         <ButtonItem layout="below" disabled={busy} onClick={() => openSave('')}>
-          Save current as new preset
+          {t('presets.saveNew')}
         </ButtonItem>
       </PanelSectionRow>
       {isUserPreset && (
@@ -131,14 +134,14 @@ export function PresetsSection({
               disabled={busy}
               onClick={() =>
                 confirm(
-                  'Overwrite preset',
-                  `Replace "${selected}" with the current settings?`,
-                  'Overwrite',
+                  t('presets.overwriteTitle'),
+                  t('presets.overwriteConfirm', { name: selected }),
+                  t('presets.overwrite'),
                   () => setPresets(savePreset(capturePreset(selected, theme))),
                 )
               }
             >
-              Overwrite "{selected}"
+              {t('presets.overwriteNamed', { name: selected })}
             </ButtonItem>
           </PanelSectionRow>
           <PanelSectionRow>
@@ -146,13 +149,13 @@ export function PresetsSection({
               layout="below"
               disabled={busy}
               onClick={() =>
-                confirm('Delete preset', `Delete "${selected}"? This can't be undone.`, 'Delete', () => {
+                confirm(t('presets.deleteTitle'), t('presets.deleteConfirm', { name: selected }), t('presets.delete'), () => {
                   setPresets(deletePreset(selected));
                   setSelected(DEFAULT_ID);
                 })
               }
             >
-              Delete "{selected}"
+              {t('presets.deleteNamed', { name: selected })}
             </ButtonItem>
           </PanelSectionRow>
         </>
@@ -163,14 +166,14 @@ export function PresetsSection({
           disabled={busy}
           onClick={() =>
             confirm(
-              'Reset to defaults',
-              'Restore every theme option and the game blur to their default values? Saved presets are kept.',
-              'Reset',
+              t('presets.resetTitle'),
+              t('presets.resetConfirm'),
+              t('presets.reset'),
               () => void run(defaultPreset(theme, BLUR_DEFAULTS)),
             )
           }
         >
-          Reset to defaults
+          {t('presets.resetTitle')}
         </ButtonItem>
       </PanelSectionRow>
     </PanelSection>
