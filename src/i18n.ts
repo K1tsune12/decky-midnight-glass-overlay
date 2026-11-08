@@ -58,6 +58,7 @@ const en = {
   'theme.Bottom Right': 'Bottom right',
   'theme.Hidden': 'Hidden',
   'theme.Transparent': 'Transparent',
+  'theme.Soft Dark': 'Soft dark',
   'theme.Status': 'Status color',
   'section.themeDesc': 'The glass look of menus, dialogs and notifications. The options below change it.',
 
@@ -175,6 +176,7 @@ const ptBR: Record<Key, string> = {
   'theme.Bottom Right': 'Inferior direito',
   'theme.Hidden': 'Oculto',
   'theme.Transparent': 'Transparente',
+  'theme.Soft Dark': 'Escuro suave',
   'theme.Status': 'Cor do status',
   'section.themeDesc': 'O visual de vidro dos menus, janelas e notificações. As opções abaixo o ajustam.',
 
