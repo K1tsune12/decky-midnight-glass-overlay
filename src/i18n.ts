@@ -41,10 +41,13 @@ const en = {
   'group.inGame': 'During a Game',
   'group.menus': 'Menus, Dialogs & Notifications',
   'group.look': 'Look',
+  'group.menuSizes': 'Menu Sizes',
   'section.themeDesc': 'The glass look of menus, dialogs and notifications. The options below change it.',
 
   // theme option names and values, as they appear in theme.json (looked up by themeText)
   'theme.In-Game Menu Style': 'In-Game Menu Style',
+  'theme.Quick Access Width': 'Quick Access menu (right)',
+  'theme.Main Menu Width': 'Main menu (left)',
   'theme.Default': 'Default',
   'theme.In-Game Bars Follow Menus': 'In-Game Bars Follow Menus',
   'theme.In-Game Dim': 'In-Game Dim',
@@ -137,9 +140,12 @@ const ptBR: Record<Key, string> = {
   'group.inGame': 'Durante o jogo',
   'group.menus': 'Menus, janelas e notificações',
   'group.look': 'Aparência',
+  'group.menuSizes': 'Tamanho dos menus',
   'section.themeDesc': 'O visual de vidro dos menus, janelas e notificações. As opções abaixo o ajustam.',
 
   'theme.In-Game Menu Style': 'Estilo do menu no jogo',
+  'theme.Quick Access Width': 'Menu de acesso rápido (direita)',
+  'theme.Main Menu Width': 'Menu principal (esquerda)',
   'theme.Default': 'Padrão',
   'theme.In-Game Bars Follow Menus': 'Barras no jogo seguem os menus',
   'theme.In-Game Dim': 'Escurecimento no jogo',

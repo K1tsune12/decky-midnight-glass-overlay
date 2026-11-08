@@ -43,6 +43,10 @@ const LOOK_GROUP: { title: Key; patches: string[] } = {
     'Text Shadow',
   ],
 };
+const MENU_SIZE_GROUP: { title: Key; patches: string[] } = {
+  title: 'group.menuSizes',
+  patches: ['Quick Access Width', 'Main Menu Width'],
+};
 const IN_GAME_GROUP: { title: Key; patches: string[] } = {
   title: 'group.inGame',
   patches: ['In-Game Menu Style', 'In-Game Bars Follow Menus', 'In-Game Dim'],
@@ -153,7 +157,7 @@ function SettingsPanel() {
   };
 
   // Theme and presets first (a preset changes everything below), then how menus
-  // look, the blur and what happens during a game.
+  // look, the blur, what happens during a game, and the menu sizes.
   return (
     <>
       <PanelSection title={t('section.theme')}>
@@ -218,6 +222,8 @@ function SettingsPanel() {
       {group(IN_GAME_GROUP)}
 
       <PerfOverlaySection settings={s} blurAvailable={!!blur?.available} onChange={updateBlur} />
+
+      {group(MENU_SIZE_GROUP)}
 
       <LanguageSection />
     </>
