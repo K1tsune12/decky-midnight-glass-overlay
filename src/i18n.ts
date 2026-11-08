@@ -17,7 +17,7 @@ const en = {
   'blur.strength': 'Blur strength',
 
   // performance overlay
-  'perf.title': 'Performance Overlay',
+  'perf.title': 'Performance Overlay (FPS)',
   'perf.blurBehind': 'Blur behind the overlay',
   'perf.blurBehindDesc':
     'Keeps the game blur on while playing, which also blurs the game behind the FPS overlay. Off: blur only while a Steam menu is open.',
@@ -38,11 +38,18 @@ const en = {
   'section.theme': 'Theme',
   'section.themeLoading': 'Loading…',
   'section.themeMissing': 'Install the {theme} theme in CSS Loader to change its options here.',
-  'group.inGame': 'In-Game Overlay',
+  'group.inGame': 'During a Game',
   'group.menus': 'Menus, Dialogs & Notifications',
+  'group.look': 'Look',
+  'group.qam': 'Quick Access Menu',
+  'section.themeDesc': 'The glass look of menus, dialogs and notifications. The options below change it.',
 
   // theme option names and values, as they appear in theme.json (looked up by themeText)
   'theme.In-Game Menu Style': 'In-Game Menu Style',
+  'theme.Quick Access Width': 'Width',
+  'theme.Wide': 'Wide',
+  'theme.Default': 'Default',
+  'theme.Extra Wide': 'Extra wide',
   'theme.In-Game Bars Follow Menus': 'In-Game Bars Follow Menus',
   'theme.In-Game Dim': 'In-Game Dim',
   'theme.Selection Opacity': 'Selection Opacity',
@@ -111,7 +118,7 @@ const ptBR: Record<Key, string> = {
   'blur.unavailable': 'Indisponível nesta versão do Steam.',
   'blur.strength': 'Intensidade do desfoque',
 
-  'perf.title': 'Sobreposição de desempenho',
+  'perf.title': 'Sobreposição de desempenho (FPS)',
   'perf.blurBehind': 'Desfoque atrás da sobreposição',
   'perf.blurBehindDesc':
     'Mantém o desfoque ligado durante o jogo, o que também desfoca o jogo atrás da sobreposição de FPS. Desligado: só desfoca com um menu do Steam aberto.',
@@ -131,10 +138,17 @@ const ptBR: Record<Key, string> = {
   'section.theme': 'Tema',
   'section.themeLoading': 'Carregando…',
   'section.themeMissing': 'Instale o tema {theme} no CSS Loader para mudar as opções dele aqui.',
-  'group.inGame': 'Sobreposição no jogo',
+  'group.inGame': 'Durante o jogo',
   'group.menus': 'Menus, janelas e notificações',
+  'group.look': 'Aparência',
+  'group.qam': 'Menu de acesso rápido',
+  'section.themeDesc': 'O visual de vidro dos menus, janelas e notificações. As opções abaixo o ajustam.',
 
   'theme.In-Game Menu Style': 'Estilo do menu no jogo',
+  'theme.Quick Access Width': 'Largura',
+  'theme.Wide': 'Larga',
+  'theme.Default': 'Padrão',
+  'theme.Extra Wide': 'Extra larga',
   'theme.In-Game Bars Follow Menus': 'Barras no jogo seguem os menus',
   'theme.In-Game Dim': 'Escurecimento no jogo',
   'theme.Selection Opacity': 'Opacidade da seleção',

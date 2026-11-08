@@ -29,22 +29,28 @@ function applySettings(s: OverlaySettings) {
 }
 
 /** Theme options shown in the panel, grouped. Missing ones are skipped. */
-const THEME_GROUPS: { title: Key; patches: string[] }[] = [
-  {
-    title: 'group.inGame',
-    patches: [
-      'In-Game Menu Style',
-      'In-Game Bars Follow Menus',
-      'In-Game Dim',
-      'Selection Opacity',
-      'Text Shadow',
-    ],
-  },
-  {
-    title: 'group.menus',
-    patches: ['Menu Opacity', 'Chat Opacity', 'Dialog Opacity', 'Notification Opacity', 'Main Color', 'Accent Color'],
-  },
-];
+// Theme options by what they change, in the order the panel shows them.
+const LOOK_GROUP: { title: Key; patches: string[] } = {
+  title: 'group.look',
+  patches: [
+    'Main Color',
+    'Accent Color',
+    'Menu Opacity',
+    'Dialog Opacity',
+    'Chat Opacity',
+    'Notification Opacity',
+    'Selection Opacity',
+    'Text Shadow',
+  ],
+};
+const IN_GAME_GROUP: { title: Key; patches: string[] } = {
+  title: 'group.inGame',
+  patches: ['In-Game Menu Style', 'In-Game Bars Follow Menus', 'In-Game Dim'],
+};
+const QAM_GROUP: { title: Key; patches: string[] } = {
+  title: 'group.qam',
+  patches: ['Quick Access Width'],
+};
 
 function PatchControl({ patch, onChange }: { patch: ThemePatch; onChange: (value: string) => void }) {
   const index = Math.max(0, patch.options.indexOf(patch.value));
@@ -132,17 +138,66 @@ function SettingsPanel() {
     void refreshTheme();
   };
 
+  const group = (g: { title: Key; patches: string[] }) => {
+    if (!theme?.enabled) return null;
+    const patches = g.patches
+      .map((n) => theme.patches.find((p) => p.name === n))
+      .filter((p): p is ThemePatch => !!p);
+    if (!patches.length) return null;
+    return (
+      <PanelSection title={t(g.title)}>
+        {patches.map((p) => (
+          <PanelSectionRow key={p.name}>
+            <PatchControl patch={p} onChange={(v) => void changePatch(p.name, v)} />
+          </PanelSectionRow>
+        ))}
+      </PanelSection>
+    );
+  };
+
+  // Theme and presets first (a preset changes everything below), then how menus
+  // look, the blur, what happens during a game, and the Quick Access menu.
   return (
     <>
+      <PanelSection title={t('section.theme')}>
+        {!themeLoaded ? (
+          <PanelSectionRow>
+            <div>{t('section.themeLoading')}</div>
+          </PanelSectionRow>
+        ) : !theme ? (
+          <PanelSectionRow>
+            <div>{t('section.themeMissing', { theme: THEME_NAME })}</div>
+          </PanelSectionRow>
+        ) : (
+          <PanelSectionRow>
+            <ToggleField
+              label={THEME_NAME}
+              description={t('section.themeDesc')}
+              checked={theme.enabled}
+              onChange={toggleTheme}
+            />
+          </PanelSectionRow>
+        )}
+      </PanelSection>
+
+      {theme?.enabled && (
+        <PresetsSection
+          theme={theme}
+          onApplied={(next) => {
+            setS(next);
+            applySettings(next);
+            void refreshTheme();
+          }}
+        />
+      )}
+
+      {group(LOOK_GROUP)}
+
       <PanelSection title={t('blur.title')}>
         <PanelSectionRow>
           <ToggleField
             label={t('blur.toggle')}
-            description={
-              blur?.available
-                ? t('blur.toggleDesc')
-                : t('blur.unavailable')
-            }
+            description={blur?.available ? t('blur.toggleDesc') : t('blur.unavailable')}
             checked={s.blurEnabled}
             disabled={!blur?.available}
             onChange={(v) => updateBlur({ blurEnabled: v })}
@@ -163,51 +218,12 @@ function SettingsPanel() {
         </PanelSectionRow>
       </PanelSection>
 
+      {group(IN_GAME_GROUP)}
+
       <PerfOverlaySection settings={s} blurAvailable={!!blur?.available} onChange={updateBlur} />
 
-      <PanelSection title={t('section.theme')}>
-        {!themeLoaded ? (
-          <PanelSectionRow>
-            <div>{t('section.themeLoading')}</div>
-          </PanelSectionRow>
-        ) : !theme ? (
-          <PanelSectionRow>
-            <div>{t('section.themeMissing', { theme: THEME_NAME })}</div>
-          </PanelSectionRow>
-        ) : (
-          <PanelSectionRow>
-            <ToggleField label={THEME_NAME} checked={theme.enabled} onChange={toggleTheme} />
-          </PanelSectionRow>
-        )}
-      </PanelSection>
+      {group(QAM_GROUP)}
 
-      {theme?.enabled && (
-        <PresetsSection
-          theme={theme}
-          onApplied={(next) => {
-            setS(next);
-            applySettings(next);
-            void refreshTheme();
-          }}
-        />
-      )}
-
-      {theme?.enabled &&
-        THEME_GROUPS.map((group) => {
-          const patches = group.patches
-            .map((n) => theme.patches.find((p) => p.name === n))
-            .filter((p): p is ThemePatch => !!p);
-          if (!patches.length) return null;
-          return (
-            <PanelSection key={group.title} title={t(group.title)}>
-              {patches.map((p) => (
-                <PanelSectionRow key={p.name}>
-                  <PatchControl patch={p} onChange={(v) => void changePatch(p.name, v)} />
-                </PanelSectionRow>
-              ))}
-            </PanelSection>
-          );
-        })}
       <LanguageSection />
     </>
   );
