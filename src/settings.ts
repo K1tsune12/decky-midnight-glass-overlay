@@ -11,6 +11,8 @@ export interface OverlaySettings {
    * menu is over the game.
    */
   blurWhilePlaying: boolean;
+  /** Blur radius while only a notification toast is over the game. 0 = no blur. */
+  blurToastRadius: number;
   /** Override the performance overlay background. */
   perfStyleEnabled: boolean;
   /** Performance overlay background color, RRGGBB. */
@@ -28,6 +30,7 @@ export const BLUR_DEFAULTS: OverlaySettings = {
   blurEnabled: true,
   blurRadius: 20,
   blurWhilePlaying: false,
+  blurToastRadius: 8,
   perfStyleEnabled: false,
   perfColor: '000000',
   perfAlpha: 0.4,
@@ -50,6 +53,7 @@ export function getSettings(): OverlaySettings {
       blurEnabled: bool(p.blurEnabled, d.blurEnabled),
       blurRadius: clamp(p.blurRadius, BLUR_RADIUS_MIN, BLUR_RADIUS_MAX, d.blurRadius),
       blurWhilePlaying: bool(p.blurWhilePlaying, d.blurWhilePlaying),
+      blurToastRadius: clamp(p.blurToastRadius, 0, BLUR_RADIUS_MAX, d.blurToastRadius),
       perfStyleEnabled: bool(p.perfStyleEnabled, d.perfStyleEnabled),
       perfColor: hex(p.perfColor, d.perfColor),
       perfAlpha: clamp(p.perfAlpha, 0, 1, d.perfAlpha),

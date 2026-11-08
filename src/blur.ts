@@ -13,7 +13,9 @@
 // Mode 1 also blurs the game behind gamescope's own overlays, like the
 // performance overlay (MangoHud). With "blur while playing" off, blur is only
 // kept while Steam draws something over the game (a menu or a notification
-// toast), so the performance overlay stays sharp during gameplay.
+// toast), so the performance overlay stays sharp during gameplay. A toast gets
+// its own, usually lighter, radius: gamescope blurs the whole game, not just
+// the area behind the toast.
 
 import { findModuleExport } from '@decky/ui';
 
@@ -42,14 +44,19 @@ const MENU_POLL_MS = 250;
 // 2 Overlay, 3 Opaque, 4 OverlayKeyboard. Anything above Hidden means Steam is
 // drawing over the game; Notification is a toast, which should get the blur too.
 const COMPOSITION_HIDDEN = 0;
+const COMPOSITION_NOTIFICATION = 1;
 
-function steamOverGame(): boolean {
+type OverGame = 'none' | 'toast' | 'menu';
+
+function steamOverGame(): OverGame {
   try {
     const store = (window as any).SteamUIStore?.m_WindowStore?.MainWindowInstance?.m_CompositionStateStore;
     const mode = store?.m_eLastPushedToWebHelperCompositionState?.eCompositionMode;
-    return typeof mode === 'number' ? mode > COMPOSITION_HIDDEN : true;
+    if (typeof mode !== 'number') return 'menu';
+    if (mode === COMPOSITION_HIDDEN) return 'none';
+    return mode === COMPOSITION_NOTIFICATION ? 'toast' : 'menu';
   } catch {
-    return true;
+    return 'menu';
   }
 }
 
@@ -68,7 +75,8 @@ export class GameBlur {
   private enabled = false;
   private radius = 20;
   private whilePlaying = true;
-  private menuOpen = true;
+  private toastRadius = 8;
+  private over: OverGame = 'menu';
   private poll?: ReturnType<typeof setInterval>;
 
   /** Finds Steam's gamescope service and blur store. Returns false if missing. */
@@ -91,22 +99,24 @@ export class GameBlur {
     const original = Object.getPrototypeOf(this.store).ApplyBlurState as () => void;
     const self = this;
     this.store.ApplyBlurState = function (this: BlurStore) {
-      const wanted = self.enabled && (self.whilePlaying || self.menuOpen);
+      const toast = self.over === 'toast';
+      const radius = toast ? self.toastRadius : self.radius;
+      const wanted = self.enabled && radius > 0 && (self.whilePlaying || self.over !== 'none');
       if (!wanted || this.m_bForceSuppressBlur || this.m_nBlurRefCount > 0) {
         return original.call(this);
       }
       void service.SetBlurParams({
         mode: BLUR_MODE_BEHIND_STEAM,
-        radius: self.radius,
+        radius,
         fade_duration_ms: FADE_MS,
       });
     };
-    this.menuOpen = steamOverGame();
+    this.over = steamOverGame();
     this.poll = setInterval(() => {
-      const open = steamOverGame();
-      if (open !== this.menuOpen) {
-        this.menuOpen = open;
-        if (!this.whilePlaying) this.reapply();
+      const over = steamOverGame();
+      if (over !== this.over) {
+        this.over = over;
+        this.reapply();
       }
     }, MENU_POLL_MS);
     return true;
@@ -116,10 +126,11 @@ export class GameBlur {
     return !!this.store;
   }
 
-  update(enabled: boolean, radius: number, whilePlaying: boolean) {
+  update(enabled: boolean, radius: number, whilePlaying: boolean, toastRadius: number) {
     this.enabled = enabled;
     this.radius = radius;
     this.whilePlaying = whilePlaying;
+    this.toastRadius = toastRadius;
     this.reapply();
   }
 

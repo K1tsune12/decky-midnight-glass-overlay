@@ -22,7 +22,7 @@ let blur: GameBlur | undefined;
 
 /** Applies the plugin's own settings: game blur and performance overlay background. */
 function applySettings(s: OverlaySettings) {
-  blur?.update(s.blurEnabled, s.blurRadius, s.blurWhilePlaying);
+  blur?.update(s.blurEnabled, s.blurRadius, s.blurWhilePlaying, s.blurToastRadius);
   setPerfStyle(s.perfStyleEnabled, s.perfColor, s.perfAlpha).catch((e) =>
     console.error('[midnight-glass-overlay] failed to style the performance overlay', e),
   );
@@ -39,13 +39,18 @@ const LOOK_GROUP: { title: Key; patches: string[] } = {
     'Dialog Opacity',
     'Chat Opacity',
     'Notification Opacity',
+    'Selection Color',
     'Selection Opacity',
     'Text Shadow',
   ],
 };
 const MENU_SIZE_GROUP: { title: Key; patches: string[] } = {
   title: 'group.menuSizes',
-  patches: ['Quick Access Width', 'Main Menu Width'],
+  patches: ['Quick Access Width', 'Main Menu Width', 'Decky Plugin Names'],
+};
+const PROTONDB_GROUP: { title: Key; patches: string[] } = {
+  title: 'group.protondb',
+  patches: ['ProtonDB Icon Position', 'ProtonDB Icon Background', 'ProtonDB Icon Color'],
 };
 const IN_GAME_GROUP: { title: Key; patches: string[] } = {
   title: 'group.inGame',
@@ -217,6 +222,20 @@ function SettingsPanel() {
             onChange={(v) => updateBlur({ blurRadius: v })}
           />
         </PanelSectionRow>
+        <PanelSectionRow>
+          <SliderField
+            label={t('blur.toastStrength')}
+            description={t('blur.toastStrengthDesc')}
+            value={s.blurToastRadius}
+            min={0}
+            max={BLUR_RADIUS_MAX}
+            step={4}
+            showValue
+            valueSuffix="px"
+            disabled={!s.blurEnabled || !blur?.available}
+            onChange={(v) => updateBlur({ blurToastRadius: v })}
+          />
+        </PanelSectionRow>
       </PanelSection>
 
       {group(IN_GAME_GROUP)}
@@ -224,6 +243,7 @@ function SettingsPanel() {
       <PerfOverlaySection settings={s} blurAvailable={!!blur?.available} onChange={updateBlur} />
 
       {group(MENU_SIZE_GROUP)}
+      {group(PROTONDB_GROUP)}
 
       <LanguageSection />
     </>
@@ -244,7 +264,7 @@ const LanguageSection: FC = () => {
         <DropdownItem
           label={t('lang.label')}
           rgOptions={[
-            { data: 'auto', label: t('lang.auto', { lang: LANGUAGE_NAMES[steamLang] }) },
+            { data: 'auto', label: t('lang.auto', { lang: steamLang }) },
             { data: 'en', label: LANGUAGE_NAMES.en },
             { data: 'pt-BR', label: LANGUAGE_NAMES['pt-BR'] },
           ]}
