@@ -12,8 +12,8 @@
 //
 // Mode 1 also blurs the game behind gamescope's own overlays, like the
 // performance overlay (MangoHud). With "blur while playing" off, blur is only
-// kept while a Steam menu is drawn over the game, so the performance overlay
-// stays sharp during gameplay.
+// kept while Steam draws something over the game (a menu or a notification
+// toast), so the performance overlay stays sharp during gameplay.
 
 import { findModuleExport } from '@decky/ui';
 
@@ -39,14 +39,15 @@ const FADE_MS = 300;
 const MENU_POLL_MS = 250;
 
 // Steam's window composition modes (main window): 0 Hidden, 1 Notification,
-// 2 Overlay, 3 Opaque, 4 OverlayKeyboard. 2+ means Steam is drawn over the game.
-const COMPOSITION_OVERLAY = 2;
+// 2 Overlay, 3 Opaque, 4 OverlayKeyboard. Anything above Hidden means Steam is
+// drawing over the game; Notification is a toast, which should get the blur too.
+const COMPOSITION_HIDDEN = 0;
 
-function steamMenuOverGame(): boolean {
+function steamOverGame(): boolean {
   try {
     const store = (window as any).SteamUIStore?.m_WindowStore?.MainWindowInstance?.m_CompositionStateStore;
     const mode = store?.m_eLastPushedToWebHelperCompositionState?.eCompositionMode;
-    return typeof mode === 'number' ? mode >= COMPOSITION_OVERLAY : true;
+    return typeof mode === 'number' ? mode > COMPOSITION_HIDDEN : true;
   } catch {
     return true;
   }
@@ -100,9 +101,9 @@ export class GameBlur {
         fade_duration_ms: FADE_MS,
       });
     };
-    this.menuOpen = steamMenuOverGame();
+    this.menuOpen = steamOverGame();
     this.poll = setInterval(() => {
-      const open = steamMenuOverGame();
+      const open = steamOverGame();
       if (open !== this.menuOpen) {
         this.menuOpen = open;
         if (!this.whilePlaying) this.reapply();

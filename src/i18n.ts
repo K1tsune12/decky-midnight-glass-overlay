@@ -20,7 +20,7 @@ const en = {
   'perf.title': 'Performance Overlay (FPS)',
   'perf.blurBehind': 'Blur behind the overlay',
   'perf.blurBehindDesc':
-    'Keeps the game blur on while playing, which also blurs the game behind the FPS overlay. Off: blur only while a Steam menu is open.',
+    'Keeps the game blur on while playing, which also blurs the game behind the FPS overlay. Off: blur only while a Steam menu or notification is showing.',
   'perf.customBg': 'Custom background',
   'perf.customBgDesc': 'Change the color and opacity behind the FPS overlay.',
   'perf.bgColor': 'Background color',
@@ -120,7 +120,7 @@ const ptBR: Record<Key, string> = {
   'perf.title': 'Sobreposição de desempenho (FPS)',
   'perf.blurBehind': 'Desfoque atrás da sobreposição',
   'perf.blurBehindDesc':
-    'Mantém o desfoque ligado durante o jogo, o que também desfoca o jogo atrás da sobreposição de FPS. Desligado: só desfoca com um menu do Steam aberto.',
+    'Mantém o desfoque ligado durante o jogo, o que também desfoca o jogo atrás da sobreposição de FPS. Desligado: só desfoca com um menu ou notificação do Steam na tela.',
   'perf.customBg': 'Fundo personalizado',
   'perf.customBgDesc': 'Muda a cor e a opacidade atrás da sobreposição de FPS.',
   'perf.bgColor': 'Cor do fundo',
