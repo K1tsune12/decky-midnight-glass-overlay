@@ -47,10 +47,7 @@ const IN_GAME_GROUP: { title: Key; patches: string[] } = {
   title: 'group.inGame',
   patches: ['In-Game Menu Style', 'In-Game Bars Follow Menus', 'In-Game Dim'],
 };
-const QAM_GROUP: { title: Key; patches: string[] } = {
-  title: 'group.qam',
-  patches: ['Quick Access Width'],
-};
+
 
 function PatchControl({ patch, onChange }: { patch: ThemePatch; onChange: (value: string) => void }) {
   const index = Math.max(0, patch.options.indexOf(patch.value));
@@ -156,7 +153,7 @@ function SettingsPanel() {
   };
 
   // Theme and presets first (a preset changes everything below), then how menus
-  // look, the blur, what happens during a game, and the Quick Access menu.
+  // look, the blur and what happens during a game.
   return (
     <>
       <PanelSection title={t('section.theme')}>
@@ -221,8 +218,6 @@ function SettingsPanel() {
       {group(IN_GAME_GROUP)}
 
       <PerfOverlaySection settings={s} blurAvailable={!!blur?.available} onChange={updateBlur} />
-
-      {group(QAM_GROUP)}
 
       <LanguageSection />
     </>
