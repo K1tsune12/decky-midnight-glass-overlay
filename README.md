@@ -20,7 +20,7 @@ theme from the Quick Access Menu, with presets.
   behind it while playing), or turn the blur behind it back on. Change its
   background color and opacity, from fully transparent to solid.
 - **Theme controls in Quick Access**: change the Kitsune Midnight Glass options
-  you use most while playing (menu, chat, dialog and notification opacity,
+  you use most while playing (menu, chat, dialog and notification opacity and color,
   selection, in-game overlay options, main and accent color) without opening
   CSS Loader.
 - **Presets**: save the current setup (every theme option, custom colors and the

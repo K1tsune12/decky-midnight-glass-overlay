@@ -40,6 +40,7 @@ const LOOK_GROUP: { title: Key; patches: string[] } = {
     'Dialog Opacity',
     'Chat Opacity',
     'Notification Opacity',
+    'Notification Color',
     'Selection Color',
     'Selection Opacity',
     'Text Shadow',
