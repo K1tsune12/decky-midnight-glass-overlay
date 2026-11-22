@@ -17,6 +17,7 @@ import { Key, LANGUAGE_NAMES, Lang, LangSetting, getLangSetting, initLanguage, s
 import { setPerfStyle } from './perf';
 import { BLUR_RADIUS_MAX, BLUR_RADIUS_MIN, OverlaySettings, getSettings, saveSettings } from './settings';
 import { THEME_NAME, ThemeInfo, ThemePatch, getTheme, setThemeEnabled, setThemePatch } from './theme';
+import { UpdateCheckButton } from './updateCheck';
 
 let blur: GameBlur | undefined;
 
@@ -101,7 +102,7 @@ function PatchControl({ patch, onChange }: { patch: ThemePatch; onChange: (value
 }
 
 function SettingsPanel() {
-  useLanguage();
+  const lang = useLanguage();
   const [s, setS] = useState<OverlaySettings>(getSettings());
   const [theme, setTheme] = useState<ThemeInfo | undefined>();
   const [themeLoaded, setThemeLoaded] = useState(false);
@@ -246,6 +247,9 @@ function SettingsPanel() {
       {group(PROTONDB_GROUP)}
 
       <LanguageSection />
+      <PanelSection>
+        <UpdateCheckButton repo="K1tsune12/decky-midnight-glass-overlay" pluginName="Midnight Glass Overlay" lang={lang} />
+      </PanelSection>
     </>
   );
 }
