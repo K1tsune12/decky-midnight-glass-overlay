@@ -6,7 +6,6 @@ import { Key } from './i18n';
 
 export const setPerfStyle = callable<[enabled: boolean, color: string, alpha: number], boolean>('set_perf_style');
 
-export const getPerfInfo = callable<[], { path: string | null; content: string | null }>('get_perf_info');
 
 /** Background color presets, RRGGBB. */
 export const PERF_COLORS: { label: Key; value: string }[] = [
